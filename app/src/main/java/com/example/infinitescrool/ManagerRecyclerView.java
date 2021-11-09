@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.util.List;
+
 /**
  * Controla a Exibição, Adição, Remoção, Clique nos Itens do RecyclerView.
  * <p>
@@ -21,17 +23,24 @@ import com.google.android.material.snackbar.Snackbar;
  */
 public class ManagerRecyclerView extends RecyclerView.Adapter<ManagerRecyclerView.InstanceItems> {
 
-    private final int max_value_item;
+    // Constantes que definem a quantidade de Itens que podem ser exibidos
+    public static final int MAX_ITEMS_LOAD = 29;
+    public static final int MAX_ITEMS_INITIAL = (3 * MAX_ITEMS_LOAD) + 3;
+
+    // Itens que serão usados na programação
+    private final List<String> list_items;
+    private final View view_snackBar;
     private View viewItem;
 
     /**
      * Contrutor da Classe ManagerRecyclerView
      *
-     * @param max_value_item Valor maximo de Itens que serão Exibidos (A Exibição irá começar do 0
-     *                       e ir até o valor Informado)
+     * @param list_items    Lista de Itens que serão Exibidos no RecyclerView
+     * @param view_snackBar View que será exibida a mensagem da SnackBar
      */
-    public ManagerRecyclerView(int max_value_item) {
-        this.max_value_item = max_value_item;
+    public ManagerRecyclerView(List<String> list_items, View view_snackBar) {
+        this.list_items = list_items;
+        this.view_snackBar = view_snackBar;
     }
 
     /**
@@ -51,22 +60,27 @@ public class ManagerRecyclerView extends RecyclerView.Adapter<ManagerRecyclerVie
      */
     @Override
     public void onBindViewHolder(@NonNull InstanceItems holder, int position) {
-        holder.txt_text.setText(position);
+        holder.txt_text.setText(String.valueOf(position));
 
         // Exibe uma Snackbar com o Valor do Item que foi Clicado
-        holder.txt_text.setOnClickListener(v -> Snackbar.make(viewItem, position, Snackbar.LENGTH_LONG)
+        holder.txt_text.setOnClickListener(v -> Snackbar
+                .make(view_snackBar, String.valueOf(position), Snackbar.LENGTH_LONG)
                 .setAction(viewItem.getContext().getString(R.string.option_ok), v1 -> {
                 }).show());
     }
 
-
+    /**
+     * Obtem o Tamanho da Lista de Itens que serão Apresentados
+     */
     @Override
     public int getItemCount() {
-        if (max_value_item == 0) return 0;
-        else return max_value_item + 1;
+        if (list_items == null || list_items.size() == 0) return 0;
+        else return list_items.size();
     }
 
-    // Classe que retorna os campos usados já referenciados
+    /**
+     * Classe que retorna os campos que serão usados, com suas referencias
+     */
     protected static class InstanceItems extends RecyclerView.ViewHolder {
 
         private final MaterialCardView cardView_recycler;
