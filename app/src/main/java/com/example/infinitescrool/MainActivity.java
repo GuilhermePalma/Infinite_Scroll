@@ -36,7 +36,8 @@ public class MainActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.recyclerview_index);
         list_recyclerView = new ArrayList<>();
-        managerRecyclerView = new ManagerRecyclerView(list_recyclerView, recyclerView);
+        managerRecyclerView = new ManagerRecyclerView(list_recyclerView, recyclerView,
+                R.layout.layout_header, getString(R.string.app_name));
 
         // Instancia a Lista de Itens com 3 vezes do valor maximo que será exibido
         for (int i = 0; i <= ManagerRecyclerView.MAX_ITEMS_INITIAL; i++) {
@@ -64,7 +65,9 @@ public class MainActivity extends AppCompatActivity {
         layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
-                return 1;
+                // Caso seja o "Loading" ou o "Header" retorna um espaço de 2, senão um espaço de 1
+                return managerRecyclerView.isLoadingRecyclerView(position) ||
+                        managerRecyclerView.isHeaderRecyclerView(position) ? 2 : 1;
             }
         });
     }

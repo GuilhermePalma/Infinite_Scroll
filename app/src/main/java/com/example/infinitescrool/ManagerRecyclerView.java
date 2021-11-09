@@ -8,7 +8,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
@@ -27,20 +26,32 @@ public class ManagerRecyclerView extends RecyclerView.Adapter<ManagerRecyclerVie
     public static final int MAX_ITEMS_LOAD = 29;
     public static final int MAX_ITEMS_INITIAL = (3 * MAX_ITEMS_LOAD) + 3;
 
+    // Tipos de Views
+    private static final int POSITION_HEADER = 0;
+    private static final int POSITION_LOADING = 1;
+    private static final int POSITION_ITEM = 2;
+
     // Itens que serão usados na programação
     private final List<String> list_items;
     private final View view_snackBar;
-    private View viewItem;
+    private final int id_layout_header;
+    private final String title_header;
+    private View view_item;
 
     /**
      * Contrutor da Classe ManagerRecyclerView
      *
-     * @param list_items    Lista de Itens que serão Exibidos no RecyclerView
-     * @param view_snackBar View que será exibida a mensagem da SnackBar
+     * @param list_items       Lista de Itens que serão Exibidos no RecyclerView
+     * @param view_snackBar    View que será exibida a mensagem da SnackBar
+     * @param id_layout_header ID do Layout do Header que será exibido no Primeiro Item
+     * @param title_header     Titulo do Header (1° Item do RecyclerView)
      */
-    public ManagerRecyclerView(List<String> list_items, View view_snackBar) {
+    public ManagerRecyclerView(List<String> list_items, View view_snackBar, int id_layout_header,
+                               String title_header) {
         this.list_items = list_items;
         this.view_snackBar = view_snackBar;
+        this.id_layout_header = id_layout_header;
+        this.title_header = title_header;
     }
 
     /**
@@ -49,10 +60,24 @@ public class ManagerRecyclerView extends RecyclerView.Adapter<ManagerRecyclerVie
     @NonNull
     @Override
     public InstanceItems onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
-        viewItem = LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.layout_recyclerview, viewGroup, false);
 
-        return new InstanceItems(viewItem);
+        // Infla o Layout de Acordo com o Tipo da View
+        switch (viewType) {
+            case POSITION_HEADER:
+                view_item = LayoutInflater.from(viewGroup.getContext())
+                        .inflate(id_layout_header, viewGroup, false);
+                break;
+            case POSITION_LOADING:
+                view_item = LayoutInflater.from(viewGroup.getContext())
+                        .inflate(R.layout.layout_loading, viewGroup, false);
+                break;
+            default:
+                view_item = LayoutInflater.from(viewGroup.getContext())
+                        .inflate(R.layout.layout_recyclerview, viewGroup, false);
+                break;
+        }
+
+        return new InstanceItems(view_item, viewType);
     }
 
     /**
@@ -60,17 +85,30 @@ public class ManagerRecyclerView extends RecyclerView.Adapter<ManagerRecyclerVie
      */
     @Override
     public void onBindViewHolder(@NonNull InstanceItems holder, int position) {
-        holder.txt_text.setText(String.valueOf(position));
+        switch (getItemViewType(position)) {
+            case POSITION_HEADER:
+                // Configura apenas o Texto do Header
+                holder.txt_header.setText(title_header);
+                break;
+            case POSITION_ITEM:
+                holder.txt_text.setText(String.valueOf(position));
 
-        // Exibe uma Snackbar com o Valor do Item que foi Clicado
-        holder.txt_text.setOnClickListener(v -> Snackbar
-                .make(view_snackBar, String.valueOf(position), Snackbar.LENGTH_LONG)
-                .setAction(viewItem.getContext().getString(R.string.option_ok), v1 -> {
-                }).show());
+                // Exibe uma Snackbar com o Valor do Item que foi Clicado
+                holder.txt_text.setOnClickListener(v -> Snackbar
+                        .make(view_snackBar, String.valueOf(position), Snackbar.LENGTH_LONG)
+                        .setAction(view_item.getContext().getString(R.string.option_ok), v1 -> {
+                        }).show());
+                break;
+            default:
+                // O Layout não Precisa ser Configurado (algum erro ou o "Loadign")
+                break;
+        }
     }
 
     /**
      * Obtem o Tamanho da Lista de Itens que serão Apresentados
+     *
+     * @return Numero de Itens na Lista passada
      */
     @Override
     public int getItemCount() {
@@ -79,18 +117,52 @@ public class ManagerRecyclerView extends RecyclerView.Adapter<ManagerRecyclerVie
     }
 
     /**
-     * Classe que retorna os campos que serão usados, com suas referencias
+     * Configura o Tipo da View (Header, Loading ou Items)
+     *
+     * @return 0 | 1 | 2
+     */
+    @Override
+    public int getItemViewType(int position) {
+        if (isHeaderRecyclerView(position)) return POSITION_HEADER;
+        else if (isLoadingRecyclerView(position)) return POSITION_LOADING;
+        return POSITION_ITEM;
+    }
+
+    /**
+     * Verifica se a View está na Posição Inicial: 0 na posição do ItemCount e 0 na Posição da Lista
+     *
+     * @param position_item Posição do Item no RecyclerView/List
+     * @return true/false
+     */
+    public boolean isHeaderRecyclerView(int position_item) {
+        return position_item == POSITION_HEADER;
+    }
+
+    /**
+     * Verifica se a View está na Posição de Loading - ocorre de 30 em 30 itens
+     *
+     * @param position_item Posição do Item no RecyclerView/List
+     * @return true/false
+     */
+    public boolean isLoadingRecyclerView(int position_item) {
+        // Verifica se o Numero é Divisivel por 30 (Com exceção dos primeiros 90 Itens)
+        if (position_item < MAX_ITEMS_INITIAL) return false;
+        else return (position_item - 1) % 30 == 0;
+    }
+
+    /**
+     * Classe que retorna os widgets que serão usados, com suas referencias e instancias
      */
     protected static class InstanceItems extends RecyclerView.ViewHolder {
 
-        private final MaterialCardView cardView_recycler;
-        private final TextView txt_text;
+        private TextView txt_text;
+        private TextView txt_header;
 
         // Recupera os valores definidos no Layout do RecycleAdpater
-        protected InstanceItems(@NonNull View itemView) {
+        protected InstanceItems(@NonNull View itemView, int type_view) {
             super(itemView);
-            txt_text = itemView.findViewById(R.id.txt_item);
-            cardView_recycler = itemView.findViewById(R.id.cardView_recyclerView);
+            if (type_view == POSITION_HEADER) txt_header = itemView.findViewById(R.id.text_header);
+            else if (type_view == POSITION_ITEM) txt_text = itemView.findViewById(R.id.txt_item);
         }
     }
 }
