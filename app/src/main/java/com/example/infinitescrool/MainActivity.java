@@ -6,6 +6,7 @@ import android.os.Looper;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -48,6 +49,16 @@ public class MainActivity extends AppCompatActivity {
         // Configura o RecyclerView
         setUpRecyclerView();
         setUpScrollRecyclerView();
+        setUpToolBar();
+    }
+
+    /**
+     * Configura a ToolBar (Barra Superior da Activity)
+     */
+    private void setUpToolBar() {
+        Toolbar toolbar = findViewById(R.id.toolbar_index);
+        toolbar.setTitle(R.string.app_name);
+        setSupportActionBar(toolbar);
     }
 
     /**
