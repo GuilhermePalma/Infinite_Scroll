@@ -3,9 +3,13 @@ package com.example.infinitescrool;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -19,16 +23,16 @@ import java.util.List;
  */
 public class MainActivity extends AppCompatActivity {
 
+    private static final int ID_CHANGE_THEMES = R.id.item_change_theme;
     // Irá Controlar se está carregando mais itens na Lista
     private boolean is_loading = false;
-
     // Armazenará o Tamanho real da Lista (tamanho da lista - 1)
     private int last_position_list = 0;
-
     // Itens usados durante o Codigo
     private List<String> list_recyclerView;
     private RecyclerView recyclerView;
     private ManagerRecyclerView managerRecyclerView;
+    private Menu menu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,12 +57,43 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Configura a ToolBar (Barra Superior da Activity)
+     * Configura a ToolBar (Barra Superior da Activity) e as opções do Menu (3 pontinhos)
      */
     private void setUpToolBar() {
         Toolbar toolbar = findViewById(R.id.toolbar_index);
         toolbar.setTitle(R.string.app_name);
         setSupportActionBar(toolbar);
+    }
+
+    /**
+     * Cria o Menu na ToolBar
+     *
+     * @return true
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Infla o Menu e Instancia a Varivael que controlará
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu_index, menu);
+
+        this.menu = menu;
+        return true;
+    }
+
+    /**
+     * Trata as Opções de Clique nos Itens do Menu
+     *
+     * @return true/false
+     */
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == ID_CHANGE_THEMES) {
+            int theme = AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES
+                    ? AppCompatDelegate.MODE_NIGHT_NO : AppCompatDelegate.MODE_NIGHT_YES;
+            AppCompatDelegate.setDefaultNightMode(theme);
+            return true;
+        }
+        return false;
     }
 
     /**
