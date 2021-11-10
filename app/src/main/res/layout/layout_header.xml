@@ -12,6 +12,7 @@
         android:id="@+id/text_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/ubuntu_mono_bold"
         android:gravity="center"
         android:text="Texto de Teste do Header"
         android:textSize="24sp"

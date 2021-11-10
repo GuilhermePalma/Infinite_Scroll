@@ -18,5 +18,6 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
 
+        <item name="fontFamily">@font/ubuntu_mono</item>
     </style>
 </resources>
