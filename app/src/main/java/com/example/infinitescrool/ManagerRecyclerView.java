@@ -24,7 +24,7 @@ public class ManagerRecyclerView extends RecyclerView.Adapter<RecyclerView.ViewH
 
     // Constantes que definem a quantidade de Itens que serão exibidos
     public static final int MAX_ITEMS_LOAD = 29;
-    public static final int MAX_ITEMS_INITIAL = MAX_ITEMS_LOAD + 2;
+    public static final int MAX_ITEMS_INITIAL = MAX_ITEMS_LOAD + 1;
 
     // Tipos de Views
     private static final int POSITION_HEADER = 0;
