@@ -20,11 +20,11 @@ import java.util.List;
  * Possui uma Classe Interna ({@link InstanceItems}) que Exerce a Função do
  * {@link RecyclerView.ViewHolder}, instanciando e Obtendo os IDs dos Itens do Layout do RecyclerView
  */
-public class ManagerRecyclerView extends RecyclerView.Adapter<ManagerRecyclerView.InstanceItems> {
+public class ManagerRecyclerView extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    // Constantes que definem a quantidade de Itens que podem ser exibidos
+    // Constantes que definem a quantidade de Itens que serão exibidos
     public static final int MAX_ITEMS_LOAD = 29;
-    public static final int MAX_ITEMS_INITIAL = (3 * MAX_ITEMS_LOAD) + 3;
+    public static final int MAX_ITEMS_INITIAL = MAX_ITEMS_LOAD + 2;
 
     // Tipos de Views
     private static final int POSITION_HEADER = 0;
@@ -56,53 +56,53 @@ public class ManagerRecyclerView extends RecyclerView.Adapter<ManagerRecyclerVie
 
     /**
      * Cria a View e Obtem os IDs necessarios para a manipulações do Widgets
+     *
+     * @param viewGroup Local onde será inserido o Layout
+     * @param viewType  Tipo da View (Header, Loading, Item, ...)
+     * @return InstanceHeader|InstanceItems (Ambos Herdam do {@link RecyclerView.ViewHolder})
      */
     @NonNull
     @Override
-    public InstanceItems onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
-
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
         // Infla o Layout de Acordo com o Tipo da View
         switch (viewType) {
             case POSITION_HEADER:
                 view_item = LayoutInflater.from(viewGroup.getContext())
                         .inflate(id_layout_header, viewGroup, false);
-                break;
+                return new InstanceHeader(view_item);
             case POSITION_LOADING:
                 view_item = LayoutInflater.from(viewGroup.getContext())
                         .inflate(R.layout.layout_loading, viewGroup, false);
-                break;
+                return new InstanceItems(view_item);
             default:
                 view_item = LayoutInflater.from(viewGroup.getContext())
                         .inflate(R.layout.layout_recyclerview, viewGroup, false);
-                break;
+                return new InstanceItems(view_item);
         }
-
-        return new InstanceItems(view_item, viewType);
     }
 
     /**
-     * Insere as Informações nos Itens do Recycler View
+     * Insere e Configura as Informações e Ações dos Itens do Recycler View
+     *
+     * @param holder   Instancia dos Itens que serão usados na view
+     * @param position Indica a posição do Item no RecyclerView
      */
     @Override
-    public void onBindViewHolder(@NonNull InstanceItems holder, int position) {
-        switch (getItemViewType(position)) {
-            case POSITION_HEADER:
-                // Configura apenas o Texto do Header
-                holder.txt_header.setText(title_header);
-                break;
-            case POSITION_ITEM:
-                holder.txt_text.setText(String.valueOf(position));
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        if (holder instanceof InstanceHeader) {
+            // Configura o Header
+            ((InstanceHeader) holder).txt_header.setText(title_header);
+        } else if (holder instanceof InstanceItems && getItemViewType(position) != POSITION_LOADING) {
+            // Configura apenas os Itens que possuem textos
+            ((InstanceItems) holder).txt_text.setText(list_items.get(position));
 
-                // Exibe uma Snackbar com o Valor do Item que foi Clicado
-                holder.txt_text.setOnClickListener(v -> Snackbar
-                        .make(view_snackBar, String.valueOf(position), Snackbar.LENGTH_LONG)
-                        .setAction(view_item.getContext().getString(R.string.option_ok), v1 -> {
-                        }).show());
-                break;
-            default:
-                // O Layout não Precisa ser Configurado (algum erro ou o "Loadign")
-                break;
+            // Exibe uma Snackbar com o Valor do Item que foi Clicado
+            ((InstanceItems) holder).txt_text.setOnClickListener(v -> Snackbar
+                    .make(view_snackBar, list_items.get(position), Snackbar.LENGTH_LONG)
+                    .setAction(view_item.getContext().getString(R.string.option_ok), v1 -> {
+                    }).show());
         }
+        // Itens não Instanciados ou Sem configurações (ex: "Loading") não possuem configurações
     }
 
     /**
@@ -112,8 +112,7 @@ public class ManagerRecyclerView extends RecyclerView.Adapter<ManagerRecyclerVie
      */
     @Override
     public int getItemCount() {
-        if (list_items == null || list_items.size() == 0) return 0;
-        else return list_items.size();
+        return list_items == null || list_items.size() == 0 ? 0 : list_items.size();
     }
 
     /**
@@ -147,22 +146,35 @@ public class ManagerRecyclerView extends RecyclerView.Adapter<ManagerRecyclerVie
     public boolean isLoadingRecyclerView(int position_item) {
         // Verifica se o Numero é Divisivel por 30 (Com exceção dos primeiros 90 Itens)
         if (position_item < MAX_ITEMS_INITIAL) return false;
-        else return (position_item - 1) % 30 == 0;
+        return list_items.get(position_item) == null;
     }
 
     /**
-     * Classe que retorna os widgets que serão usados, com suas referencias e instancias
+     * Classe que retorna os widgets dos Itens que serão usados, com suas referencias e instancias
      */
     protected static class InstanceItems extends RecyclerView.ViewHolder {
 
-        private TextView txt_text;
-        private TextView txt_header;
+        private final TextView txt_text;
 
-        // Recupera os valores definidos no Layout do RecycleAdpater
-        protected InstanceItems(@NonNull View itemView, int type_view) {
+        // Recupera os valores definidos no Layout do RecycleAdapter
+        protected InstanceItems(@NonNull View itemView) {
             super(itemView);
-            if (type_view == POSITION_HEADER) txt_header = itemView.findViewById(R.id.text_header);
-            else if (type_view == POSITION_ITEM) txt_text = itemView.findViewById(R.id.txt_item);
+            txt_text = itemView.findViewById(R.id.txt_item);
+        }
+    }
+
+    /**
+     * Classe que retorna os widgets do Header (Cabeçalho) que serão usados, com suas referencias
+     * e instancias
+     */
+    protected static class InstanceHeader extends RecyclerView.ViewHolder {
+
+        private final TextView txt_header;
+
+        // Recupera os valores definidos no Layout do RecycleAdapter
+        protected InstanceHeader(@NonNull View itemView) {
+            super(itemView);
+            txt_header = itemView.findViewById(R.id.text_header);
         }
     }
 }

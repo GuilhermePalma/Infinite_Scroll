@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean is_loading = false;
 
     // Armazenará o Tamanho real da Lista (tamanho da lista - 1)
-    private int real_size_list = 0;
+    private int last_position_list = 0;
 
     // Itens usados durante o Codigo
     private List<String> list_recyclerView;
@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i <= ManagerRecyclerView.MAX_ITEMS_INITIAL; i++) {
             list_recyclerView.add(String.valueOf(i));
         }
-        real_size_list = list_recyclerView.size() - 1;
+        syncSizeList();
 
         // Configura o RecyclerView
         setUpRecyclerView();
@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
                 if (dy > 0 && !is_loading) {
                     // Obtem o Controlador do Layout e o Tamanho da Lista dos Itens
                     LinearLayoutManager layoutRecycler = (LinearLayoutManager) recyclerView.getLayoutManager();
-                    if (layoutRecycler != null && layoutRecycler.findLastCompletelyVisibleItemPosition() == real_size_list) {
+                    if (layoutRecycler != null && layoutRecycler.findLastCompletelyVisibleItemPosition() == last_position_list) {
                         is_loading = true;
                         loadMoreItems();
                     }
@@ -101,23 +101,41 @@ public class MainActivity extends AppCompatActivity {
      * Adiciona a nova quantidade de Itens ao RecyclerView
      */
     private void loadMoreItems() {
+        // Adiciona um Item Nulo (Loading)
+        list_recyclerView.add(null);
+        syncSizeList();
+        managerRecyclerView.notifyItemInserted(last_position_list);
+
+        // Joga o Scroll para depois do Loading
+        recyclerView.scrollToPosition(last_position_list);
+
         // Realiza as Operações em Background, dando uma pausa de 2 segundos
         Handler handler = new Handler(Looper.getMainLooper());
         handler.postDelayed(() -> {
+            // Remove o Loading (Ultimo Item) da Lista e Notifica o RecyclerView
+            list_recyclerView.remove(last_position_list);
+            managerRecyclerView.notifyItemRemoved(last_position_list);
+            syncSizeList();
 
-            // Define um NOVO tamanho da LISTA (novo tamanho = novos itens)
-            int next_real_size = real_size_list + ManagerRecyclerView.MAX_ITEMS_LOAD;
-            for (int i = real_size_list; i <= next_real_size; i++) {
+            // Define um novo tamanho da Lista com os novos itens
+            int next_real_size = last_position_list + ManagerRecyclerView.MAX_ITEMS_LOAD;
+            for (int i = last_position_list; i <= next_real_size; i++) {
+                // Insere na Lista e Notifica o RecyclerView das Inserções
                 list_recyclerView.add(String.valueOf(i));
+                managerRecyclerView.notifyItemInserted(i);
             }
 
-            // Atualiza os Itens no Recycler View
-            recyclerView.post(() -> managerRecyclerView.notifyDataSetChanged());
-
             // Atualiza o Valor Real da Lista, Notifica o Controlador do RecyclerView que houve Mudança
-            real_size_list = list_recyclerView.size() - 1;
+            syncSizeList();
             is_loading = false;
         }, 2000);
+    }
+
+    /**
+     * Atualiza a Variavel que armazena o Tamanho Real (Tamanho da Lista -1) da Lista com os Itens
+     */
+    private void syncSizeList() {
+        last_position_list = list_recyclerView.size() - 1;
     }
 
 }
