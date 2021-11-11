@@ -26,14 +26,14 @@
 
 ## Conteudos
 
-- [Conteudos](##-conteudos)
-  - [Sobre o Projeto](##-sobre-o-projeto)
-  - [Executando o Projeto](##-executando-o-projeto)
-    - [Pré-Requisitos](###-pré-Requisitos)
-    - [Download](###-download)
-  - [Tecnologias Utilizadas](##-tecnologias-utilizadas)
-  - [Contribuições](##-contribuições)
-  - [Sobre o Projeto](##-sobre-o-projeto)
+- [Conteudos](#conteudos)
+  - [Sobre o Projeto](#sobre-o-projeto)
+  - [Executando o Projeto](#executando-o-projeto)
+    - [Pré-Requisitos](#pré-Requisitos)
+    - [Download](#download)
+  - [Tecnologias Utilizadas](#tecnologias-utilizadas)
+  - [Contribuições](#contribuições)
+  - [Sobre o Projeto](#sobre-o-projeto)
 
 ## Sobre o Projeto
 
