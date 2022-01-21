@@ -4,8 +4,6 @@
 
   <h4>Carregamento Infinito de Itens</h4>
 
-  [!Funcionamento do APP](https://user-images.githubusercontent.com/54846154/150580191-2076eb7f-d364-4e62-b9f2-1cf0152bc53e.mp4)
-
   <p id="icons">
     <a href="#icons">
       <img alt="Quantiade de Linguagens" src="https://img.shields.io/github/languages/count/guilhermepalma/Infinite_Scroll?color=2304D361">
@@ -21,7 +19,7 @@
     </a>
   </p>
 
-  <!--Adicionar fotos do app ou video-->
+  [!Funcionamento do APP](https://user-images.githubusercontent.com/54846154/150580191-2076eb7f-d364-4e62-b9f2-1cf0152bc53e.mp4)
 </div>
 
 <br/>
